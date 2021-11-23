@@ -1,0 +1,35 @@
+{
+  "parser": "@babel/eslint-parser",
+  "env": {
+    "browser": true,
+    "es6": true,
+    "jest/globals": true
+  },
+  "parserOptions": {
+    "ecmaVersion": 2018,
+    "sourceType": "module"
+  },
+  "plugins": [
+    "prefer-object-spread",
+    "import",
+    "jest"
+  ],
+  "extends": [
+    "umbrellio",
+  ],
+  "rules": {
+    "switch-colon-spacing": "off",
+    "no-buffer-constructor": "off",
+    "no-unused-vars": ["error", { "varsIgnorePattern": "^_", "argsIgnorePattern": "^_" }],
+    "new-cap": "off",
+    "prefer-promise-reject-errors": "off",
+    "eqeqeq": ["error", "smart"],
+    "import/order": ["error", {
+      "groups": [["builtin", "external"], "internal", "parent", "sibling"],
+      "newlines-between": "always-and-inside-groups"
+    }],
+    "import/no-anonymous-default-export": ["error", { "allowObject": true }],
+    "import/group-exports": "error",
+    "jest/no-disabled-tests": "error",
+  }
+}
