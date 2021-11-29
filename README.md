@@ -2,7 +2,7 @@
 
 HTTP Provider with integrated auth tokens
 
-Based on [axios](https://github.com/axios/axios) library.
+Based on [fetch](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch).
 
 ## Install
 
@@ -34,7 +34,7 @@ Options:
 - `getToken` – `void => Promise<string>` – retuns saved auth token
 - `saveToken` – `token => Promise<void>` – save refreshed token
 - `refreshToken` – `() => Promise<string>` – refresh current token
-- `onError` – `Error => void` – calls on error (Error object is just an error from `axios`)
+- `onError` – `Error => void` – calls on error (Error object is just a request from `fetch`)
 
 And after that you can create a http provider:
 
