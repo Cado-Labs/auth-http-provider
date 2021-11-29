@@ -45,15 +45,20 @@ And after that you can create a http provider:
 ```js
 const provider = factory.create({ baseURL })
 
-await provider.get("/some-url")
-await provider.post("/some-url")
-await provider.put("/some-url")
-await provider.patch("/some-url")
-await provider.delete("/some-url")
+await provider.get("/some-url", { query, headers })
+await provider.post("/some-url", { json, headers })
+await provider.put("/some-url", { json, headers })
+await provider.patch("/some-url", { json, headers })
+await provider.delete("/some-url", { json, headers })
 ```
 
 Options:
 - `baseURL` – `string` – base url of API server (eg. `https://api.example.com/v1`)
+
+Request options:
+- `query` – `object` – object to be used in url as query params
+- `json` – `object` – object to be passed as a request body (also adds `Content-Type: application/json` header)
+- `headers` – `object` – any additional headers
 
 ## How does it work
 
