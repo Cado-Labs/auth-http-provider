@@ -22,24 +22,17 @@
     "@babel/plugin-transform-runtime": "^7.16.4",
     "@babel/preset-env": "^7.14.8",
     "@babel/runtime": "^7.16.3",
-    "axios-mock-adapter": "^1.20.0",
     "babel-jest": "^27.0.6",
     "coveralls": "^3.1.1",
     "eslint": "^8.3.0",
     "eslint-config-umbrellio": "^5.0.1",
     "eslint-plugin-import": "^2.23.4",
     "eslint-plugin-jest": "^25.3.0",
-    "eslint-plugin-jsx-a11y": "^6.4.1",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prefer-object-spread": "^1.2.1",
     "eslint-plugin-promise": "^5.1.0",
     "jest": "^27.0.6",
+    "jest-fetch-mock": "^3.0.3",
     "rollup": "^2.60.1"
-  },
-  "peerDependencies": {
-    "axios": "^0.24.0"
-  },
-  "dependencies": {
-    "axios": "^0.24.0"
   }
 }

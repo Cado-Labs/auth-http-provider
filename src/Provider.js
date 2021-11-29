@@ -1,47 +1,61 @@
-import axios from "axios"
-
 export default class Provider {
   constructor ({ factory, baseURL }) {
     this.factory = factory
-    this.client = axios.create({ baseURL })
+    this.baseURL = baseURL
   }
 
-  get = (url, params = {}, headers = {}) => this.#request({ method: "get", url, params, headers })
+  get = (path, query = {}, headers = {}) => this.#request({ method: "get", path, query, headers })
 
-  post = (url, data = {}, headers = {}) => this.#request({ method: "post", url, data, headers })
+  post = (path, body = {}, headers = {}) => this.#request({ method: "post", path, body, headers })
 
-  put = (url, data = {}, headers = {}) => this.#request({ method: "put", url, data, headers })
+  put = (path, body = {}, headers = {}) => this.#request({ method: "put", path, body, headers })
 
-  patch = (url, data = {}, headers = {}) => this.#request({ method: "patch", url, data, headers })
+  patch = (path, body = {}, headers = {}) => this.#request({ method: "patch", path, body, headers })
 
-  delete = (url, data = {}, headers = {}) => this.#request({ method: "delete", url, data, headers })
+  delete = (path, body = {}, headers = {}) => this.#request({
+    method: "delete",
+    path,
+    body,
+    headers,
+  })
 
   #request = async request => {
     const token = await this.factory.getToken()
 
-    try {
-      return await this.#perform(request, token)
-    } catch (e) {
-      if (e.response.status === 401) {
-        try {
-          const newToken = await this.factory.refreshToken()
-          const response = await this.#perform(request, newToken)
-          await this.factory.saveToken(newToken)
-          return response
-        } catch (e) {
-          this.factory.onError(e)
-          throw e
-        }
-      } else {
-        throw e
+    const response = await this.#perform(request, token)
+
+    if (response.ok) return response
+
+    if (response.status === 401) {
+      const newToken = await this.factory.refreshToken()
+      const newResponse = await this.#perform(request, newToken)
+
+      if (newResponse.ok) {
+        await this.factory.saveToken(newToken)
+        return newResponse
       }
+
+      this.factory.onError(response)
+      throw newResponse
     }
+
+    throw response
   }
 
-  #perform = ({ method, url, params, data, headers }, token) => {
+  #perform = ({ method, path, query, body, headers }, token) => {
+    const uri = this.#buildUrl(path, query)
     const requestHeaders = { ...headers, Authorization: `Bearer ${token}` }
-    const request = { method, params, data, url, headers: requestHeaders }
 
-    return this.client.request(request)
+    return fetch(uri, { method, body, headers: requestHeaders })
+  }
+
+  #buildUrl = (path, query = {}) => {
+    const url = new URL(this.baseURL)
+    const searchParams = new URLSearchParams(query)
+
+    url.pathname = path
+    url.search = searchParams.toString()
+
+    return url.toString()
   }
 }
