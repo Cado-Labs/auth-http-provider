@@ -49,7 +49,11 @@ describe("making requests", () => {
 
       const expectedUrl = isGet ? "http://localhost/route?key=value" : "http://localhost/route"
       const expectedBody = isGet ? null : JSON.stringify({ key: "value" })
-      const expectedHeaders = makeHeaderMatcher("current-token", { header: "value" })
+
+      const expectedHeaders = { header: "value" }
+      if (!isGet) { expectedHeaders["Content-Type"] = "application/json" }
+
+      const expectedHeadersMather = makeHeaderMatcher("current-token", expectedHeaders)
 
       expect(response.status).toEqual(200)
       expect(response.json()).resolves.toEqual({ success: true })
@@ -57,7 +61,7 @@ describe("making requests", () => {
       expect(fetch).toHaveBeenCalledWith(expectedUrl, {
         method,
         body: expectedBody,
-        headers: expectedHeaders,
+        headers: expectedHeadersMather,
       })
     })
   })
