@@ -44,12 +44,11 @@ export default class Provider {
 
   #perform = ({ method, path, query, json, headers }, token) => {
     const uri = this.#buildUrl(path, query)
+
     const requestBody = json ? JSON.stringify(json) : null
-    const requestHeaders = {
-      ...headers,
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    }
+    const requestHeaders = { ...headers, Authorization: `Bearer ${token}` }
+
+    if (json) requestHeaders['Content-Type'] = 'application/json'
 
     return fetch(uri, { method, body: requestBody, headers: requestHeaders })
   }

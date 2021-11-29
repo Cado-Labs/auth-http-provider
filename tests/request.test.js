@@ -4,7 +4,7 @@ import Provider from "../src"
 
 fetchMock.enableMocks()
 
-const METHODS = ["get", "post", "put", "patch", "delete"]
+const METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE"]
 
 const getToken = jest.fn(() => Promise.resolve("current-token"))
 const saveToken = jest.fn(_token => Promise.resolve())
@@ -32,24 +32,30 @@ const makeCallingMatcher = token => {
 describe("making requests", () => {
   const provider = createProvider()
 
-  const makeRequest = method => provider[method]("/route", { key: "value" }, { header: "value" })
-
   METHODS.forEach(method => {
-    it(`${method.toUpperCase()} | performs request`, async () => {
+    it(`${method} | performs request`, async () => {
       fetchMock.mockOnce(JSON.stringify({ success: true }), { status: 200 })
 
-      const response = await makeRequest(method)
+      const isGet = method === "GET"
+      const headers = { header: "value" }
+      const data = { key: "value" }
+      const params = { headers }
 
-      const isGet = method === "get"
+      if (isGet) { params.query = data }
+      else { params.json = data }
+
+      const fn = provider[method.toLowerCase()]
+      const response = await fn("/route", params)
+
       const expectedUrl = isGet ? "http://localhost/route?key=value" : "http://localhost/route"
-      const expectedBody = isGet ? undefined : { key: "value" }
+      const expectedBody = isGet ? null : JSON.stringify({ key: "value" })
       const expectedHeaders = makeHeaderMatcher("current-token", { header: "value" })
 
       expect(response.status).toEqual(200)
       expect(response.json()).resolves.toEqual({ success: true })
       expect(getToken).toHaveBeenCalled()
       expect(fetch).toHaveBeenCalledWith(expectedUrl, {
-        method,
+        method: method,
         body: expectedBody,
         headers: expectedHeaders,
       })
@@ -61,13 +67,13 @@ describe("refreshing token", () => {
   const provider = createProvider()
 
   METHODS.forEach(method => {
-    it(`${method.toUpperCase()} | tries to refresh token`, async () => {
+    it(`${method} | tries to refresh token`, async () => {
       fetchMock.mockResponses(
         ["", { status: 401 }],
         [JSON.stringify({ success: true }), { status: 200 }],
       )
 
-      const response = await provider[method]("/route")
+      const response = await provider[method.toLowerCase()]("/route")
 
       expect(response.status).toEqual(200)
       expect(response.json()).resolves.toEqual({ success: true })
@@ -84,13 +90,13 @@ describe("refreshing token", () => {
 
 describe("errors", () => {
   METHODS.forEach(method => {
-    it(`${method.toUpperCase()} | calls onError when refresh token didn't help`, async () => {
+    it(`${method} | calls onError when refresh token didn't help`, async () => {
       fetchMock.mockResponse("", { status: 401 })
 
       const provider = createProvider()
 
       try {
-        await provider[method]("/route")
+        await provider[method.toLowerCase()]("/route")
       } catch (e) {
         expect(e.status).toEqual(401)
       }
@@ -105,13 +111,13 @@ describe("errors", () => {
       expect(fetchMock).toHaveBeenNthCalledWith(2, ...makeCallingMatcher("new-token"))
     })
 
-    it(`${method.toUpperCase()} | throws an error on non-401 statuses`, async () => {
+    it(`${method} | throws an error on non-401 statuses`, async () => {
       fetchMock.once("", { status: 500 })
 
       const provider = createProvider()
 
       try {
-        await provider[method]("/route")
+        await provider[method.toLowerCase()]("/route")
       } catch (e) {
         expect(e.status).toEqual(500)
       }
