@@ -48,7 +48,7 @@ export default class Provider {
     const requestBody = json ? JSON.stringify(json) : null
     const requestHeaders = { ...headers, Authorization: `Bearer ${token}` }
 
-    if (json) requestHeaders['Content-Type'] = 'application/json'
+    if (json) requestHeaders["Content-Type"] = "application/json"
 
     return fetch(uri, { method, body: requestBody, headers: requestHeaders })
   }

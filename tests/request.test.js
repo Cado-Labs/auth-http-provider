@@ -55,7 +55,7 @@ describe("making requests", () => {
       expect(response.json()).resolves.toEqual({ success: true })
       expect(getToken).toHaveBeenCalled()
       expect(fetch).toHaveBeenCalledWith(expectedUrl, {
-        method: method,
+        method,
         body: expectedBody,
         headers: expectedHeaders,
       })
@@ -97,7 +97,8 @@ describe("errors", () => {
 
       try {
         await provider[method.toLowerCase()]("/route")
-      } catch (e) {
+      }
+      catch (e) {
         expect(e.status).toEqual(401)
       }
 
@@ -118,7 +119,8 @@ describe("errors", () => {
 
       try {
         await provider[method.toLowerCase()]("/route")
-      } catch (e) {
+      }
+      catch (e) {
         expect(e.status).toEqual(500)
       }
 
