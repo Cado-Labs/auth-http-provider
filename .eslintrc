@@ -31,5 +31,6 @@
     "import/no-anonymous-default-export": ["error", { "allowObject": true }],
     "import/group-exports": "error",
     "jest/no-disabled-tests": "error",
+    "brace-style": ["error", "stroustrup", { "allowSingleLine": true }]
   }
 }

@@ -4,18 +4,18 @@ export default class Provider {
     this.baseURL = baseURL
   }
 
-  get = (path, query = {}, headers = {}) => this.#request({ method: "get", path, query, headers })
+  get = (path, { query, headers } = {}) => this.#request({ method: "GET", path, query, headers })
 
-  post = (path, body = {}, headers = {}) => this.#request({ method: "post", path, body, headers })
+  post = (path, { json, headers } = {}) => this.#request({ method: "POST", path, json, headers })
 
-  put = (path, body = {}, headers = {}) => this.#request({ method: "put", path, body, headers })
+  put = (path, { json, headers } = {}) => this.#request({ method: "PUT", path, json, headers })
 
-  patch = (path, body = {}, headers = {}) => this.#request({ method: "patch", path, body, headers })
+  patch = (path, { json, headers } = {}) => this.#request({ method: "PATCH", path, json, headers })
 
-  delete = (path, body = {}, headers = {}) => this.#request({
-    method: "delete",
+  delete = (path, { json, headers } = {}) => this.#request({
+    method: "DELETE",
     path,
-    body,
+    json,
     headers,
   })
 
@@ -42,11 +42,15 @@ export default class Provider {
     throw response
   }
 
-  #perform = ({ method, path, query, body, headers }, token) => {
+  #perform = ({ method, path, query, json, headers }, token) => {
     const uri = this.#buildUrl(path, query)
+
+    const requestBody = json ? JSON.stringify(json) : null
     const requestHeaders = { ...headers, Authorization: `Bearer ${token}` }
 
-    return fetch(uri, { method, body, headers: requestHeaders })
+    if (json) requestHeaders["Content-Type"] = "application/json"
+
+    return fetch(uri, { method, body: requestBody, headers: requestHeaders })
   }
 
   #buildUrl = (path, query = {}) => {
