@@ -6,16 +6,35 @@ export default class Provider {
 
   get = (path, { query, headers } = {}) => this.#request({ method: "GET", path, query, headers })
 
-  post = (path, { json, headers } = {}) => this.#request({ method: "POST", path, json, headers })
+  post = (path, { json, form, headers } = {}) => this.#request({
+    method: "POST",
+    path,
+    json,
+    form,
+    headers,
+  })
 
-  put = (path, { json, headers } = {}) => this.#request({ method: "PUT", path, json, headers })
+  put = (path, { json, form, headers } = {}) => this.#request({
+    method: "PUT",
+    path,
+    json,
+    form,
+    headers,
+  })
 
-  patch = (path, { json, headers } = {}) => this.#request({ method: "PATCH", path, json, headers })
+  patch = (path, { json, form, headers } = {}) => this.#request({
+    method: "PATCH",
+    path,
+    json,
+    form,
+    headers,
+  })
 
-  delete = (path, { json, headers } = {}) => this.#request({
+  delete = (path, { json, form, headers } = {}) => this.#request({
     method: "DELETE",
     path,
     json,
+    form,
     headers,
   })
 
@@ -42,15 +61,28 @@ export default class Provider {
     throw response
   }
 
-  #perform = ({ method, path, query, json, headers }, token) => {
+  #perform = ({ method, path, query, json, form, headers }, token) => {
     const uri = this.#buildUrl(path, query)
 
-    const requestBody = json ? JSON.stringify(json) : null
+    const requestBody = this.#buildBody({ json, form })
+    const requestHeaders = this.#buildHeaders({ headers, token, json })
+
+    return fetch(uri, { method, body: requestBody, headers: requestHeaders })
+  }
+
+  #buildBody = ({ json, form }) => {
+    if (json) return JSON.stringify(json)
+    if (form) return form
+
+    return null
+  }
+
+  #buildHeaders = ({ headers, token, json }) => {
     const requestHeaders = { ...headers, Authorization: `Bearer ${token}` }
 
     if (json) requestHeaders["Content-Type"] = "application/json"
 
-    return fetch(uri, { method, body: requestBody, headers: requestHeaders })
+    return requestHeaders
   }
 
   #buildUrl = (path, query = {}) => {
