@@ -1,6 +1,6 @@
 {
   "name": "@cadolabs/auth-http-provider",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "HTTP Provider that works with JWT auth",
   "repository": "https://github.com/Cado-Labs/auth-http-provider",
   "homepage": "https://github.com/Cado-Labs/auth-http-provider",
