@@ -33,10 +33,11 @@ describe("making requests", () => {
   const provider = createProvider()
 
   METHODS.forEach(method => {
+    const isGet = method === "GET"
+
     it(`${method} | performs request`, async () => {
       fetchMock.mockOnce(JSON.stringify({ success: true }), { status: 200 })
 
-      const isGet = method === "GET"
       const headers = { header: "value" }
       const data = { key: "value" }
       const params = { headers }
@@ -62,6 +63,28 @@ describe("making requests", () => {
         method,
         body: expectedBody,
         headers: expectedHeadersMather,
+      })
+    })
+
+    if (isGet) return
+
+    it(`${method} | sends form`, async () => {
+      fetchMock.mockOnce(JSON.stringify({ success: true }), { status: 200 })
+
+      const headers = { header: "value" }
+      const form = new FormData()
+      const params = { headers, form }
+
+      const fn = provider[method.toLowerCase()]
+      const response = await fn("/route", params)
+
+      expect(response.status).toEqual(200)
+      expect(response.json()).resolves.toEqual({ success: true })
+      expect(getToken).toHaveBeenCalled()
+      expect(fetch).toHaveBeenCalledWith("http://localhost/route", {
+        method,
+        body: expect.any(FormData),
+        headers: makeHeaderMatcher("current-token", { header: "value" }),
       })
     })
   })

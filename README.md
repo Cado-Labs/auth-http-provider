@@ -58,6 +58,7 @@ Options:
 Request options:
 - `query` – `object` – object to be used in url as query params (works only for GET requests)
 - `json` – `object` – object to be passed as a request body (also adds `Content-Type: application/json` header)
+- `form` – `FormData` – FormData object to be passed as a request body
 - `headers` – `object` – any additional headers
 
 ## How does it work
