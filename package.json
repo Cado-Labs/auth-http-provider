@@ -1,6 +1,6 @@
 {
   "name": "@cadolabs/auth-http-provider",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "description": "HTTP Provider that works with JWT auth",
   "repository": "https://github.com/Cado-Labs/auth-http-provider",
   "homepage": "https://github.com/Cado-Labs/auth-http-provider",
@@ -34,5 +34,8 @@
     "jest": "^27.0.6",
     "jest-fetch-mock": "^3.0.3",
     "rollup": "^2.60.1"
+  },
+  "dependencies": {
+    "qs": "^6.10.2"
   }
 }
