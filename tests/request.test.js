@@ -39,7 +39,7 @@ describe("making requests", () => {
       fetchMock.mockOnce(JSON.stringify({ success: true }), { status: 200 })
 
       const headers = { header: "value" }
-      const data = { key: "value" }
+      const data = { key: "value", arr: [1, 2] }
       const params = { headers }
 
       if (isGet) { params.query = data }
@@ -48,8 +48,11 @@ describe("making requests", () => {
       const fn = provider[method.toLowerCase()]
       const response = await fn("/route", params)
 
-      const expectedUrl = isGet ? "http://localhost/route?key=value" : "http://localhost/route"
-      const expectedBody = isGet ? null : JSON.stringify({ key: "value" })
+      const expectedUrl = isGet
+        ? "http://localhost/route?key=value&arr%5B%5D=1&arr%5B%5D=2"
+        : "http://localhost/route"
+
+      const expectedBody = isGet ? null : JSON.stringify({ key: "value", arr: [1, 2] })
 
       const expectedHeaders = { header: "value" }
       if (!isGet) { expectedHeaders["Content-Type"] = "application/json" }
