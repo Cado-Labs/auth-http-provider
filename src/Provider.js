@@ -1,3 +1,5 @@
+import qs from "qs"
+
 export default class Provider {
   constructor ({ factory, baseURL }) {
     this.factory = factory
@@ -87,10 +89,9 @@ export default class Provider {
 
   #buildUrl = (path, query = {}) => {
     const url = new URL(this.baseURL)
-    const searchParams = new URLSearchParams(query)
 
     url.pathname = path
-    url.search = searchParams.toString()
+    url.search = qs.stringify(query, { arrayFormat: "brackets" })
 
     return url.toString()
   }
