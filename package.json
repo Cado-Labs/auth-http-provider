@@ -11,7 +11,7 @@
   "scripts": {
     "build": "rollup -c",
     "lint": "eslint .",
-    "prepublishOnly": "npm run build",
+    "prepublishOnly": "yarn build",
     "test": "jest",
     "test:coverage": "jest --coverage"
   },
