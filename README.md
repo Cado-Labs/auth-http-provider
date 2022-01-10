@@ -56,7 +56,7 @@ Options:
 - `baseURL` – `string` – base url of API server (eg. `https://api.example.com/v1`)
 
 Request options:
-- `query` – `object` – object to be used in url as query params (works only for GET requests)
+- `query` – `object` – object to be used in url as query params
 - `json` – `object` – object to be passed as a request body (also adds `Content-Type: application/json` header)
 - `form` – `FormData` – FormData object to be passed as a request body
 - `headers` – `object` – any additional headers
