@@ -8,34 +8,38 @@ export default class Provider {
 
   get = (path, { query, headers } = {}) => this.#request({ method: "GET", path, query, headers })
 
-  post = (path, { json, form, headers } = {}) => this.#request({
+  post = (path, { json, query, form, headers } = {}) => this.#request({
     method: "POST",
     path,
     json,
+    query,
     form,
     headers,
   })
 
-  put = (path, { json, form, headers } = {}) => this.#request({
+  put = (path, { json, query, form, headers } = {}) => this.#request({
     method: "PUT",
     path,
     json,
+    query,
     form,
     headers,
   })
 
-  patch = (path, { json, form, headers } = {}) => this.#request({
+  patch = (path, { json, query, form, headers } = {}) => this.#request({
     method: "PATCH",
     path,
     json,
+    query,
     form,
     headers,
   })
 
-  delete = (path, { json, form, headers } = {}) => this.#request({
+  delete = (path, { json, query, form, headers } = {}) => this.#request({
     method: "DELETE",
     path,
     json,
+    query,
     form,
     headers,
   })
