@@ -40,18 +40,14 @@ describe("making requests", () => {
 
       const headers = { header: "value" }
       const data = { key: "value", arr: [1, 2] }
-      const params = { headers }
+      const params = { headers, query: data }
 
-      if (isGet) { params.query = data }
-      else { params.json = data }
+      if (!isGet) { params.json = data }
 
       const fn = provider[method.toLowerCase()]
       const response = await fn("/route", params)
 
-      const expectedUrl = isGet
-        ? "http://localhost/route?key=value&arr%5B%5D=1&arr%5B%5D=2"
-        : "http://localhost/route"
-
+      const expectedUrl = "http://localhost/route?key=value&arr%5B%5D=1&arr%5B%5D=2"
       const expectedBody = isGet ? null : JSON.stringify({ key: "value", arr: [1, 2] })
 
       const expectedHeaders = { header: "value" }
