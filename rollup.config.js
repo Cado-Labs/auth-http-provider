@@ -8,7 +8,7 @@ const buildConfig = format => {
       file: `dist/auth-http-provider.${format}.js`,
       format,
     },
-    plugins: [babel()],
+    plugins: [babel({ babelHelpers: 'bundled' })],
   }
 }
 
