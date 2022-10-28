@@ -11,7 +11,7 @@ Based on [fetch](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Usin
 ## Install
 
 ```sh
-npm i --save @cadolabs/auth-http-provider
+npm i @cadolabs/auth-http-provider
 ```
 
 or
@@ -35,7 +35,7 @@ const factory = AuthHTTPProvider.make({ getToken, saveToken, refreshToken, onErr
 
 Options:
 
-- `getToken` – `void => Promise<string>` – retuns saved auth token
+- `getToken` – `void => Promise<string>` – returns saved auth token
 - `saveToken` – `token => Promise<void>` – save refreshed token
 - `refreshToken` – `() => Promise<string>` – refresh current token
 - `onError` – `Error => void` – calls on error (Error object is just a request from `fetch`)

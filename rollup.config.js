@@ -1,3 +1,5 @@
+import { babel } from "@rollup/plugin-babel"
+
 const buildConfig = format => {
   return {
     input: "src/index.js",
@@ -6,6 +8,7 @@ const buildConfig = format => {
       file: `dist/auth-http-provider.${format}.js`,
       format,
     },
+    plugins: [babel({ babelHelpers: "bundled" })],
   }
 }
 
