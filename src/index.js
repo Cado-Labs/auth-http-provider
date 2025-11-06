@@ -5,10 +5,10 @@ class Factory {
     return new Factory(params)
   }
 
-  constructor ({ getToken, saveToken, refreshToken, onError }) {
-    this.getToken = getToken
-    this.saveToken = saveToken
-    this.refreshToken = refreshToken
+  constructor ({ getAccessToken, saveTokens, refreshTokens, onError }) {
+    this.getAccessToken = getAccessToken
+    this.saveTokens = saveTokens
+    this.refreshTokens = refreshTokens
     this.onError = onError
   }
 
