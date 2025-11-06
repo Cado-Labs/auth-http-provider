@@ -6,14 +6,17 @@ fetchMock.enableMocks()
 
 const METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE"]
 
-const getToken = jest.fn(() => Promise.resolve("current-token"))
-const saveToken = jest.fn(_token => Promise.resolve())
-const refreshToken = jest.fn(() => Promise.resolve("new-token"))
+const getAccessToken = jest.fn(() => Promise.resolve("current-token"))
+const saveTokens = jest.fn(_tokens => Promise.resolve())
+const refreshTokens = jest.fn(() => Promise.resolve({
+  accessToken: "new-access-token",
+  refreshToken: "new-refresh-token",
+}))
 const onError = jest.fn(_error => Promise.resolve())
 
 const createProvider = () => {
   return Provider
-    .make({ getToken, saveToken, refreshToken, onError })
+    .make({ getAccessToken, saveTokens, refreshTokens, onError })
     .create({ baseURL: "http://localhost" })
 }
 
@@ -57,7 +60,7 @@ describe("making requests", () => {
 
       expect(response.status).toEqual(200)
       expect(response.json()).resolves.toEqual({ success: true })
-      expect(getToken).toHaveBeenCalled()
+      expect(getAccessToken).toHaveBeenCalled()
       expect(fetch).toHaveBeenCalledWith(expectedUrl, {
         method,
         body: expectedBody,
@@ -79,7 +82,7 @@ describe("making requests", () => {
 
       expect(response.status).toEqual(200)
       expect(response.json()).resolves.toEqual({ success: true })
-      expect(getToken).toHaveBeenCalled()
+      expect(getAccessToken).toHaveBeenCalled()
       expect(fetch).toHaveBeenCalledWith("http://localhost/route", {
         method,
         body: expect.any(FormData),
@@ -103,13 +106,16 @@ describe("refreshing token", () => {
 
       expect(response.status).toEqual(200)
       expect(response.json()).resolves.toEqual({ success: true })
-      expect(getToken).toHaveBeenCalled()
-      expect(saveToken).toHaveBeenCalledWith("new-token")
-      expect(refreshToken).toHaveBeenCalled()
+      expect(getAccessToken).toHaveBeenCalled()
+      expect(saveTokens).toHaveBeenCalledWith({
+        accessToken: "new-access-token",
+        refreshToken: "new-refresh-token",
+      })
+      expect(refreshTokens).toHaveBeenCalled()
 
       expect(fetchMock).toHaveBeenCalledTimes(2)
       expect(fetchMock).toHaveBeenNthCalledWith(1, ...makeCallingMatcher("current-token"))
-      expect(fetchMock).toHaveBeenNthCalledWith(2, ...makeCallingMatcher("new-token"))
+      expect(fetchMock).toHaveBeenNthCalledWith(2, ...makeCallingMatcher("new-access-token"))
     })
   })
 })
@@ -128,14 +134,14 @@ describe("errors", () => {
         expect(e.status).toEqual(401)
       }
 
-      expect(getToken).toHaveBeenCalled()
-      expect(refreshToken).toHaveBeenCalled()
-      expect(saveToken).not.toHaveBeenCalled()
+      expect(getAccessToken).toHaveBeenCalled()
+      expect(refreshTokens).toHaveBeenCalled()
+      expect(saveTokens).not.toHaveBeenCalled()
       expect(onError).toHaveBeenCalled()
 
       expect(fetchMock).toHaveBeenCalledTimes(2)
       expect(fetchMock).toHaveBeenNthCalledWith(1, ...makeCallingMatcher("current-token"))
-      expect(fetchMock).toHaveBeenNthCalledWith(2, ...makeCallingMatcher("new-token"))
+      expect(fetchMock).toHaveBeenNthCalledWith(2, ...makeCallingMatcher("new-access-token"))
     })
 
     it(`${method} | throws an error on non-401 statuses`, async () => {
@@ -150,9 +156,9 @@ describe("errors", () => {
         expect(e.status).toEqual(500)
       }
 
-      expect(getToken).toHaveBeenCalled()
-      expect(refreshToken).not.toHaveBeenCalled()
-      expect(saveToken).not.toHaveBeenCalled()
+      expect(getAccessToken).toHaveBeenCalled()
+      expect(refreshTokens).not.toHaveBeenCalled()
+      expect(saveTokens).not.toHaveBeenCalled()
       expect(onError).not.toHaveBeenCalled()
 
       expect(fetchMock).toHaveBeenCalledTimes(1)
