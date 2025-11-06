@@ -30,14 +30,14 @@ import AuthHTTPProvider from "@cadolabs/auth-http-provider"
 First you need to create a factory
 
 ```js
-const factory = AuthHTTPProvider.make({ getToken, saveToken, refreshToken, onError })
+const factory = AuthHTTPProvider.make({ getAccessToken, saveTokens, refreshTokens, onError })
 ```
 
 Options:
 
-- `getToken` – `void => Promise<string>` – returns saved auth token
-- `saveToken` – `token => Promise<void>` – save refreshed token
-- `refreshToken` – `() => Promise<string>` – refresh current token
+- `getAccessToken` – `() => Promise<string>` – returns saved access token
+- `saveTokens` – `(tokens: { accessToken: string, refreshToken: string }) => Promise<void>` – save tokens
+- `refreshTokens` – `() => Promise<{ accessToken: string, refreshToken: string }>` – refresh current tokens
 - `onError` – `Error => void` – calls on error (Error object is just a request from `fetch`)
 
 And after that you can create a http provider:
@@ -63,11 +63,11 @@ Request options:
 
 ## How does it work
 
-On each request performing it calls callback `getToken` to get the auth token and makes the request with auth header `Authorization: Bearer <token>`.
+On each request performing it calls callback `getAccessToken` to get the auth token and makes the request with auth header `Authorization: Bearer <token>`.
 
-When any request you made fails with 401 error code, it tries to refresh the token using callback `refreshToken` and perform it one more time with the new token. If it fails again, it calls `onError` callback and throws an error.
+When any request you made fails with 401 error code, it tries to refresh the tokens using callback `refreshTokens` and perform it one more time with the new access token. If it fails again, it calls `onError` callback and throws an error.
 
-If request complited successfully with new token, it calls `saveToken` to make your code save it somewhere.
+If request complited successfully with new token, it calls `saveTokens` to make your code save new tokens somewhere.
 
 In other cases it behaves like a regular request-performing library.
 
