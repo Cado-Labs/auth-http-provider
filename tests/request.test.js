@@ -14,9 +14,9 @@ const refreshTokens = jest.fn(() => Promise.resolve({
 }))
 const onError = jest.fn(_error => Promise.resolve())
 
-const createProvider = () => {
+const createProvider = params => {
   return Provider
-    .make({ getAccessToken, saveTokens, refreshTokens, onError })
+    .make({ getAccessToken, saveTokens, refreshTokens, onError, ...params })
     .create({ baseURL: "http://localhost" })
 }
 
@@ -142,6 +142,28 @@ describe("errors", () => {
       expect(fetchMock).toHaveBeenCalledTimes(2)
       expect(fetchMock).toHaveBeenNthCalledWith(1, ...makeCallingMatcher("current-token"))
       expect(fetchMock).toHaveBeenNthCalledWith(2, ...makeCallingMatcher("new-access-token"))
+    })
+
+    it(`${method} | no re-request occurs if the token is not received`, async () => {
+      fetchMock.mockResponse("", { status: 401 })
+
+      const refreshTokensReturnedNothing = jest.fn(() => Promise.resolve())
+      const provider = createProvider({ refreshTokens: refreshTokensReturnedNothing })
+
+      try {
+        await provider.get("/route")
+      }
+      catch (e) {
+        expect(e.status).toEqual(401)
+      }
+
+      expect(getAccessToken).toHaveBeenCalled()
+      expect(refreshTokensReturnedNothing).toHaveBeenCalled()
+      expect(saveTokens).not.toHaveBeenCalled()
+      expect(onError).toHaveBeenCalled()
+
+      expect(fetchMock).toHaveBeenCalledTimes(1)
+      expect(fetchMock).toHaveBeenNthCalledWith(1, ...makeCallingMatcher("current-token"))
     })
 
     it(`${method} | throws an error on non-401 statuses`, async () => {
