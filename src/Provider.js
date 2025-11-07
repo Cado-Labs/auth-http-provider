@@ -53,7 +53,13 @@ export default class Provider {
 
     if (response.status === 401) {
       const newTokens = await this.factory.refreshTokens()
-      const newResponse = await this.#perform(request, newTokens?.accessToken)
+
+      if (!newTokens?.accessToken) {
+        this.factory.onError(response)
+        throw response
+      }
+
+      const newResponse = await this.#perform(request, newTokens.accessToken)
 
       if (newResponse.ok) {
         await this.factory.saveTokens(newTokens)
