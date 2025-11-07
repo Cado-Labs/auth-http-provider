@@ -45,18 +45,24 @@ export default class Provider {
   })
 
   #request = async request => {
-    const token = await this.factory.getToken()
+    const accessToken = await this.factory.getAccessToken()
 
-    const response = await this.#perform(request, token)
+    const response = await this.#perform(request, accessToken)
 
     if (response.ok) return response
 
     if (response.status === 401) {
-      const newToken = await this.factory.refreshToken()
-      const newResponse = await this.#perform(request, newToken)
+      const newTokens = await this.factory.refreshTokens()
+
+      if (!newTokens?.accessToken) {
+        this.factory.onError(response)
+        throw response
+      }
+
+      const newResponse = await this.#perform(request, newTokens.accessToken)
 
       if (newResponse.ok) {
-        await this.factory.saveToken(newToken)
+        await this.factory.saveTokens(newTokens)
         return newResponse
       }
 
