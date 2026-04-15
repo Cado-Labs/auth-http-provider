@@ -120,6 +120,61 @@ describe("refreshing token", () => {
   })
 })
 
+describe("saving tokens", () => {
+  METHODS.forEach(method => {
+    it(`${method} | saves tokens right after refresh, even if retry fails`, async () => {
+      fetchMock.mockResponse("", { status: 401 })
+
+      const localSaveTokens = jest.fn(() => Promise.resolve())
+      const provider = createProvider({ saveTokens: localSaveTokens })
+
+      try {
+        await provider[method.toLowerCase()]("/route")
+      }
+      catch (_e) {
+        // expected to throw
+      }
+
+      expect(refreshTokens).toHaveBeenCalled()
+      expect(localSaveTokens).toHaveBeenCalledWith({
+        accessToken: "new-access-token",
+        refreshToken: "new-refresh-token",
+      })
+    })
+  })
+})
+
+describe("concurrent token refresh", () => {
+  it("refreshes token only once when multiple requests get 401 simultaneously", async () => {
+    fetchMock.mockResponses(
+      ["", { status: 401 }],
+      ["", { status: 401 }],
+      [JSON.stringify({ success: true }), { status: 200 }],
+      [JSON.stringify({ success: true }), { status: 200 }],
+    )
+
+    const localRefreshTokens = jest.fn(() => Promise.resolve({
+      accessToken: "new-access-token",
+      refreshToken: "new-refresh-token",
+    }))
+    const localSaveTokens = jest.fn(() => Promise.resolve())
+    const provider = createProvider({
+      refreshTokens: localRefreshTokens,
+      saveTokens: localSaveTokens,
+    })
+
+    const [response1, response2] = await Promise.all([
+      provider.get("/route"),
+      provider.get("/route"),
+    ])
+
+    expect(response1.status).toEqual(200)
+    expect(response2.status).toEqual(200)
+    expect(localRefreshTokens).toHaveBeenCalledTimes(1)
+    expect(localSaveTokens).toHaveBeenCalledTimes(1)
+  })
+})
+
 describe("errors", () => {
   METHODS.forEach(method => {
     it(`${method} | calls onError when refresh token didn't help`, async () => {
@@ -136,7 +191,10 @@ describe("errors", () => {
 
       expect(getAccessToken).toHaveBeenCalled()
       expect(refreshTokens).toHaveBeenCalled()
-      expect(saveTokens).not.toHaveBeenCalled()
+      expect(saveTokens).toHaveBeenCalledWith({
+        accessToken: "new-access-token",
+        refreshToken: "new-refresh-token",
+      })
       expect(onError).toHaveBeenCalled()
 
       expect(fetchMock).toHaveBeenCalledTimes(2)

@@ -44,6 +44,21 @@ export default class Provider {
     headers,
   })
 
+  #refreshPromise = null
+
+  #refreshTokens = () => {
+    if (this.#refreshPromise) return this.#refreshPromise
+    this.#refreshPromise = this.factory.refreshTokens()
+      .then(async newTokens => {
+        if (newTokens?.accessToken) await this.factory.saveTokens(newTokens)
+        return newTokens
+      })
+      .finally(() => {
+        this.#refreshPromise = null
+      })
+    return this.#refreshPromise
+  }
+
   #request = async request => {
     const accessToken = await this.factory.getAccessToken()
 
@@ -52,7 +67,7 @@ export default class Provider {
     if (response.ok) return response
 
     if (response.status === 401) {
-      const newTokens = await this.factory.refreshTokens()
+      const newTokens = await this.#refreshTokens()
 
       if (!newTokens?.accessToken) {
         this.factory.onError(response)
@@ -62,7 +77,6 @@ export default class Provider {
       const newResponse = await this.#perform(request, newTokens.accessToken)
 
       if (newResponse.ok) {
-        await this.factory.saveTokens(newTokens)
         return newResponse
       }
 
