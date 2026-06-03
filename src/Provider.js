@@ -67,7 +67,14 @@ export default class Provider {
     if (response.ok) return response
 
     if (response.status === 401) {
-      const newTokens = await this.#refreshTokens()
+      let newTokens
+      try {
+        newTokens = await this.#refreshTokens()
+      }
+      catch (error) {
+        this.factory.onError(error)
+        throw error
+      }
 
       if (!newTokens?.accessToken) {
         this.factory.onError(response)
@@ -80,7 +87,7 @@ export default class Provider {
         return newResponse
       }
 
-      this.factory.onError(response)
+      this.factory.onError(newResponse)
       throw newResponse
     }
 
