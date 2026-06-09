@@ -224,6 +224,51 @@ describe("errors", () => {
       expect(fetchMock).toHaveBeenNthCalledWith(1, ...makeCallingMatcher("current-token"))
     })
 
+    it(`${method} | routes refreshTokens throw through onError and re-throws`, async () => {
+      fetchMock.resetMocks()
+      fetchMock.mockResponse("", { status: 401 })
+
+      const refreshError = Object.assign(new Error("refresh.failed"), { status: 422 })
+      const failingRefresh = jest.fn(() => Promise.reject(refreshError))
+      const localSaveTokens = jest.fn()
+      const localOnError = jest.fn()
+      const provider = createProvider({
+        refreshTokens: failingRefresh,
+        saveTokens: localSaveTokens,
+        onError: localOnError,
+      })
+
+      await expect(provider[method.toLowerCase()]("/route")).rejects.toBe(refreshError)
+
+      expect(failingRefresh).toHaveBeenCalled()
+      expect(localOnError).toHaveBeenCalledWith(refreshError)
+      expect(localSaveTokens).not.toHaveBeenCalled()
+      expect(fetchMock).toHaveBeenCalledTimes(1) // no retry after a throwing refresh
+    })
+
+    it(`${method} | reports the retry response (not the original 401) to onError`, async () => {
+      fetchMock.resetMocks()
+      fetchMock.mockResponses(
+        ["", { status: 401 }], // original request: access token expired -> refresh
+        ["", { status: 403 }], // retry with the fresh token: a different failure
+      )
+
+      const localOnError = jest.fn()
+      const provider = createProvider({ onError: localOnError })
+
+      // The thrown value is already the retry response...
+      await expect(provider[method.toLowerCase()]("/route"))
+        .rejects.toEqual(expect.objectContaining({ status: 403 }))
+
+      // ...but onError must see that same actual failure (403), not the stale 401
+      // that merely triggered the refresh — otherwise telemetry and any host-side
+      // status branching act on the wrong response.
+      expect(localOnError).toHaveBeenCalledTimes(1)
+      expect(localOnError).toHaveBeenCalledWith(expect.objectContaining({ status: 403 }))
+
+      expect(fetchMock).toHaveBeenCalledTimes(2)
+    })
+
     it(`${method} | throws an error on non-401 statuses`, async () => {
       fetchMock.once("", { status: 500 })
 
